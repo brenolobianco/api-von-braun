@@ -4,10 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Command;
 use App\Models\Device;
+use App\Services\TelnetService;
 use Illuminate\Http\Request;
 
 class CommandController extends Controller
 {
+    protected $telnetService;
+
+    public function __construct(TelnetService $telnetService)
+    {
+        $this->telnetService = $telnetService;
+    }
+
     public function index($deviceId)
     {
         $device = Device::find($deviceId);
@@ -78,5 +86,31 @@ class CommandController extends Controller
         $command->delete();
 
         return response()->json(['message' => 'Command deleted successfully'], 200);
+    }
+
+    public function executeCommand(Request $request, $deviceId, $commandId)
+    {
+        $command = Command::where('device_id', $deviceId)->where('id', $commandId)->first();
+        if (!$command) {
+            return response()->json(['message' => 'Command not found'], 404);
+        }
+
+        $device = Device::find($deviceId);
+        if (!$device) {
+            return response()->json(['message' => 'Device not found'], 404);
+        }
+
+        $hostname = $device->hostname;
+        $port = $device->port ?? 23; // Porta padrão Telnet é 23
+        $username = $device->username;
+        $password = $device->password;
+
+        $telnetService = new TelnetService($hostname, $port, $username, $password);
+        $response = $telnetService->sendCommand($command->command);
+
+        return response()->json([
+            'command' => $command->command,
+            'response' => $response,
+        ]);
     }
 }

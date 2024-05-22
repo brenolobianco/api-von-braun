@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDevicesTable extends Migration
+class CreateUserDevicesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,10 @@ class CreateDevicesTable extends Migration
      */
     public function up()
     {
-        Schema::create('devices', function (Blueprint $table) {
+        Schema::create('device_user', function (Blueprint $table) {
             $table->id();
-            $table->string('identifier')->unique();
-            $table->string('description');
-            $table->string('manufacturer');
-            $table->string('url');
-            $table->json('commands');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('device_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -31,6 +28,6 @@ class CreateDevicesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('devices');
+        Schema::dropIfExists('user_devices');
     }
 }

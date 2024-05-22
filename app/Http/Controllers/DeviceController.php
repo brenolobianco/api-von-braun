@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Device;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -80,10 +81,17 @@ class DeviceController extends Controller
         return response()->json(['message' => 'Device selected successfully'], 200);
     }
 
-    public function selectedDevices()
+   
+    public function getUserDevices($userId)
     {
-        $user = Auth::user();
-        $devices = $user->devices;
-        return response()->json($devices, 200);
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $devices = $user->devices;  
+
+        return response()->json($devices);
     }
 }
